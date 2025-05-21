@@ -1,4 +1,4 @@
-name: Build Angular App
+name: Build and Test .NET App
 
 on:
   push:
@@ -14,17 +14,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
-          node-version: '18'
+          dotnet-version: '8.0.x'
 
-      - name: Install dependencies
+      - name: Restore dependencies
         run: |
-          cd angular-app
-          npm install
+          cd dotnet-app
+          dotnet restore
 
-      - name: Build Angular
+      - name: Build project
         run: |
-          cd angular-app
-          npm run build -- --configuration=production
+          cd dotnet-app
+          dotnet build --no-restore --configuration Release
+
+      - name: Run tests
+        run: |
+          cd dotnet-app
+          dotnet test --no-build --verbosity normal
+
+      - name: Check code formatting
+        run: |
+          cd dotnet-app
+          dotnet format --verify-no-changes
+
+      - name: Check NuGet vulnerabilities
+        run: |
+          cd dotnet-app
+          dotnet list package --vulnerable
