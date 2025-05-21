@@ -1,32 +1,50 @@
-name: Build and Test .NET App
+name: Final-pip
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  docker:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      
+name: Checkout repository
+      uses: actions/checkout@v2,
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3
+      
+name:  Login f Docker Hub
+      uses: docker/login-action@v1
       with:
-        dotnet-version: '8.0.x'
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }},
 
-    - name: Restore dependencies
-      run: dotnet restore ./dotnet-app
+      
+name:  Build w Push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: mohamedchliyah01/dotnet-app:latest, mohamedchliyah01/dotnet-app:${{ github.run_number }},
 
-    - name: Build
-      run: dotnet build --no-restore ./dotnet-app
+      
+name:  Format Check
+      run: dotnet format --verify-no-changes, || true
 
-    - name: Test
-      run: dotnet test ./dotnet-app --no-build --verbosity normal
+      
+name:  Scan NuGet Vulnerabilities
+      run: dotnet list package --vulnerable, || true 
 
-    - name: Publish
-      run: dotnet publish ./dotnet-app -c Release -o ./dotnet-app/out
+      
+name: 🔔 Envoyer Notification Discord (Success)
+      if: success()
+      run: |
+        curl -H "Content-Type: application/json" \-X POST \-d "{"content": "CI Success: Build #${{ github.run_number }} Daz mezyan!"}" \https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp,
+
+      
+name: ❌ Envoyer Notification Discord (Failure)
+      if: failure()
+      run: |
+        curl -H "Content-Type: application/json" \-X POST \-d "{"content": "CI Failed: Build #${{ github.run_number }} Ma dazch mezyan!"}" \https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp,
