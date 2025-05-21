@@ -23,31 +23,34 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./dotnet-app
-file: ./dotnet-app/Dockerfile
-
+          file: ./dotnet-app/Dockerfile
           push: true
           tags: |
             mohamedchliyah01/dotnet-app:latest
             mohamedchliyah01/dotnet-app:${{ github.run_number }}
 
       - name: Format Check
-        run: dotnet format --verify-no-changes
+        run: |
+          cd dotnet-app
+          dotnet format --verify-no-changes
 
       - name: Scan NuGet Vulnerabilities
-        run: dotnet list package --vulnerable
+        run: |
+          cd dotnet-app
+          dotnet list package --vulnerable
 
       - name: 🔔 Send Discord Notification (Success)
         if: success()
         run: |
           curl -H "Content-Type: application/json" \
-          -X POST \
-          -d "{\"content\": \"✅ CI Success: Build #${{ github.run_number }} Daz mezyan!\"}" \
-          https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp
+            -X POST \
+            -d "{\"content\": \"✅ CI Success: Build #${{ github.run_number }} Daz mezyan!\"}" \
+            https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp
 
       - name: ❌ Send Discord Notification (Failure)
         if: failure()
         run: |
           curl -H "Content-Type: application/json" \
-          -X POST \
-          -d "{\"content\": \"❌ CI Failed: Build #${{ github.run_number }} Ma dazch mezyan!\"}" \
-          https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp
+            -X POST \
+            -d "{\"content\": \"❌ CI Failed: Build #${{ github.run_number }} Ma dazch mezyan!\"}" \
+            https://discord.com/api/webhooks/1374541317203300492/eBq-330IkJ1_ZJZRiidtB5LUXIoLVrUHbPweFFDACCommoQRIsdBCJytRIXyz5TeRQBp
