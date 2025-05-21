@@ -26,8 +26,9 @@ jobs:
           file: ./dotnet-app/Dockerfile
           push: true
           tags: |
-            mohamedchliyah01/dotnet-app:latest
-            mohamedchliyah01/dotnet-app:${{ github.run_number }}
+            youssef2187/dotnet-app:latest
+            youssef2187/dotnet-app:${{ github.run_number }}
+
 
       - name: Format Check
         run: |
